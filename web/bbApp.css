@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css?family=Oxygen');
+
+:root
+{
+    --bb-color-1:             white;
+    --bb-color-1-alternative: #ECF0F1;
+    --bb-color-2:             #3498DB;
+    --bb-color-2-alternative: #2980B9;
+    --bb-color-3:             #E74C3C;
+    --bb-color-4:             #2C3E50;
+
+}
+
+body
+{
+    position: absolute; 
+
+    width: 100%;
+    height: 100%;
+
+    background-color: var(--bb-color-1-alternative);
+
+    font-family: 'Oxygen', sans-serif;
+}
+
+/*.column, .bb-header
+{
+    box-shadow: 0 0 5px 5px rgba(46, 46, 46, 0.2);
+}*/
+
+.bb-header
+{
+    background-color:   var(--bb-color-2-alternative);
+    color:              var(--bb-color-1);
+}
+
+.bb-header *
+{
+    color: var(--bb-color-1);
+}
+
+.bb-container
+{
+    border: 1px solid var(--bb-color-2-alternative);
+    background-color: var(--bb-color-1);
+}
+
+#bb-login-form
+{
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}

@@ -1,0 +1,26 @@
+{
+  "name": "blockbeat",
+  "version": "1.0.0",
+  "description": "My first bigchaindb application to track heartrates of patients.",
+  "main": "dist/BlockBeat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "cd ./src && tsc",
+    "bundle": "browserify ./bin/BlockBeat.js -s blockbeat_module -o ./bin/bundle.js",
+    "build": "npm run compile && npm run bundle"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artusvranken/BlockBeat.git"
+  },
+  "author": "Artus Vranken",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/artusvranken/BlockBeat/issues"
+  },
+  "homepage": "https://github.com/artusvranken/BlockBeat#readme",
+  "dependencies": {
+    "bigchaindb-driver": "^3.2.0",
+    "bip39": "^2.5.0"
+  }
+}
