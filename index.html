@@ -93,9 +93,31 @@
 
     </div>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCjzt1wtqgfpUkVqdh3pI9u9hPDGjGBHtE",
+            authDomain: "blockbeat-ad349.firebaseapp.com",
+            databaseURL: "https://blockbeat-ad349.firebaseio.com",
+            projectId: "blockbeat-ad349",
+            storageBucket: "",
+            messagingSenderId: "938391433158"
+        };
+        firebase.initializeApp(config);
+    </script>
+    
+    <!-- Vue -->
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+    <!-- BlockBeat.js -->
     <script src="bin/bundle.js"></script>
+
+    <!-- Custom Vue app -->
     <script src="web/bbApp.js"></script>
+
+    <!-- Font Awesome -->
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
 </body>
 

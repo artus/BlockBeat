@@ -4,6 +4,9 @@ var bbApp = new Vue({
         // The BlockBeat class connecting to BigChainDB
         blockBeat: new blockbeat_module.BlockBeat(),
 
+        // Link to firebase database
+        database = firebase.database(),
+
         // General
         title: "BlockBeat",
         slogan: "Take distribution to heart",
@@ -15,6 +18,8 @@ var bbApp = new Vue({
         currentUser: undefined,
 
         // inputfields
+        registerFirstname: "",
+        registerLastname: "",
     },
     methods: {
         isActive(pane)
@@ -32,7 +37,11 @@ var bbApp = new Vue({
         logIn()
         {
 
-        }
+        },
+        register()
+        {
+
+        },
 
     }
 });
