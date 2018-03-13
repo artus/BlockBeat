@@ -11,10 +11,13 @@
 
 }
 
+html
+{
+    background-color: var(--bb-color-1-alternative);
+}
+
 body
 {
-    position: absolute; 
-
     width: 100%;
     height: 100%;
 
@@ -67,4 +70,14 @@ body
 .bb-bg
 {
     background-color: var(--bb-color-2-alternative);
+}
+
+.bb-rounded
+{
+    border-radius: 5px;
+}
+
+.bb-bg h3
+{
+    color: var(--bb-color-1);
 }

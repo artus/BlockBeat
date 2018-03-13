@@ -6,19 +6,16 @@ import * as bip39 from 'bip39';
 import { HeartRate } from './HeartRate';
 import { Person } from './Person';
 
-export class BlockBeat
-{
-    private _app_id   : string = "5f8c5f3f";
-    private _app_key  : string = "f60a520fc0c384ae9f4ccd4d02675160";
-    private _api_path : string = "http://localhost:9984/api/v1/";
+export class BlockBeat {
+    private _app_id: string = "9cc97217";
+    private _app_key: string = "c2f607017548896f02d2bf45a7696cab";
+    private _api_path: string = "https://test.bigchaindb.com/api/v1/";
 
-    private _connection : driver.connection;
+    private _connection: driver.connection;
 
     public _persons = new Array<Person>();
-    public _tx      = new Array<any>();
 
-    constructor(app_id : string = "5f8c5f3f", app_key : string = "f60a520fc0c384ae9f4ccd4d02675160", api_path : string = "http://localhost:9984/api/v1/")
-    {
+    constructor(app_id: string = "5f8c5f3f", app_key: string = "f60a520fc0c384ae9f4ccd4d02675160", api_path: string = "https://test.bigchaindb.com/api/v1/") {
         this._app_id = app_id;
         this._app_key = app_key;
         this._api_path = api_path;
@@ -27,70 +24,143 @@ export class BlockBeat
             app_id: this.app_id,
             app_key: this.app_key
         });
-
-        this._tx = new Array();
     }
 
     // Getters
 
-    private get app_id() : string
-    {
+    private get app_id(): string {
         return this._app_id;
     }
 
-    private get app_key() : string
-    {
+    private get app_key(): string {
         return this._app_key;
     }
 
-    private get api_path() : string
-    {
+    private get api_path(): string {
         return this._api_path;
     }
 
-    private get connection() : driver.connection
-    {
+    private get connection(): driver.connection {
         return this._connection;
     }
 
     // Methods
 
     /**
-     * Add a new HeartRate to the BigChainDB.
+     * Create a new asset to push to BigChainDB.
      * 
+     * @param [string] patientId - The ID of the patient this medical information belongs to.
      * @param [HeartRate] heartRate - The HeartRate to add.
      */
-    public addHeartRate(heartRate : HeartRate, identity : any) : any
-    {
-        let output = 
-            [ driver.Transaction.makeOutput(
-                    driver.Transaction.makeEd25519Condition(identity.publicKey))
+    public createHeartRate(patientId: string, heartRate: HeartRate, identity: any, callback: any): any {
+        let output =
+            [driver.Transaction.makeOutput(
+                driver.Transaction.makeEd25519Condition(identity.publicKey))
             ];
 
         const txNewTransaction = driver.Transaction.makeCreateTransaction(
+            // Asset: is of the patient this heartrate is from
+            {
+                "data": {
+                    "type": "BlockBeatAsset",
+                    "patient": patientId
+                }
+            },
+
+            // Meta: the heartrate reading
             heartRate,
+
             // A transaction needs an output
             output,
             identity.publicKey
-        )
+        );
 
-        // Keep track of all transactions
-        this._tx.push(txNewTransaction);
+        // We sign this new transaction
+        const signedTransaction = driver.Transaction.signTransaction(txNewTransaction, identity.privateKey)
+
+        // Send the transaction off to BigchainDB
+        this.connection.postTransaction(signedTransaction)
+            // Check the status of the transaction
+            .then(() => this.connection.pollStatusAndFetchTransaction(signedTransaction.id))
+            .then(res => {
+                // txSigned.id corresponds to the asset id of the painting
+                callback(signedTransaction.id);
+            })
     }
 
-    public getHeartRate(id : string) : HeartRate
+    public getAssetIdByPatientId(patientId, callback)
     {
-        // TODO
-        return null;
+        this.connection.searchAssets(patientId).then(assets => {
+            callback(assets[0].id);
+        })
     }
 
-    public getAllHeartRates() : Array<HeartRate>
-    {
-        return null;
+    /**
+     * Append a new HeartRateReading to an existing asset.
+     * 
+     * @param [string] assetId - The ID of the asset we want to update/transfer.
+     * @param [HeartRate] heartRate - The new HeartRate reading we want to append.
+     * @param [any] identity - The identity of the asset owner.
+     * @param [any] callback - The callback function that needs to be executed on completion.
+     */
+    public addHeartRate(assetId: string, heartRate: HeartRate, identity: any, callback : any): any {
+
+            console.log("transaction started.");
+
+        // We retrieve the transaction based on its id
+        this.connection.getTransaction(assetId).then(transaction => {
+
+            console.log("asset pulled");
+
+            // We create a transfer transaction based on the returned transaction
+            const transferTransaction = driver.Transaction.makeTransferTransaction(
+                [{ tx: transaction, output_index: 0}],
+
+                [driver.Transaction.makeOutput(driver.Transaction.makeEd25519Condition(identity.publicKey))],
+
+                // Add the new HeartRate reading as metadata.
+                heartRate
+            );
+
+            console.log("signing transaction");
+
+            // Sign this transaction
+            const signedTransaction = driver.signTransaction(transferTransaction, identity.privateKey);
+
+            console.log("posting transaction.");
+
+            // Submit this transaction and return the promise
+            return this.connection.postTransaction(signedTransaction);
+        }).then(signedTransaction => {
+
+            console.log("transaction sent.");
+
+            // Poll for the status of the submitted transaction
+            driver.pollStatusAndFetchTransaction(signedTransaction.id).then(response => {
+                // Send the id to the callback function
+                callback(response.id);
+            });
+        });
     }
 
-    public generateIdentity(seed : string = "") : any
+    /**
+     * 
+     * @param callback 
+     */
+    public getAllHeartRates(callback : any) 
     {
+        this.connection.searchAssets("BlockBeatAsset").then(assets => {
+            callback(assets);
+        })
+    }
+
+    public getAllHeartRatesByPatientId(patientId : string, callback: any) {
+        this.connection.searchMetadata(patientId).then(assets => {
+            callback(assets);
+        })
+    }
+
+    public generateIdentity(seed: string = ""): any {
         if (seed == "") return new driver.Ed25519Keypair();
         return new driver.Ed25519Keypair(bip39.mnemonicToSeed(seed).slice(0, 32));
     }
