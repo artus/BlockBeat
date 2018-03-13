@@ -1,4 +1,7 @@
 "use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -89,3 +92,5 @@ var BlockBeat = /** @class */ (function () {
     return BlockBeat;
 }());
 exports.BlockBeat = BlockBeat;
+__export(require("./HeartRate"));
+__export(require("./Person"));

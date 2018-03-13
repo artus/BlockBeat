@@ -35,18 +35,18 @@
                             <div class="field">
                                 <label for="bb-login-username" class="label">Username:</label>
                                 <div class="control">
-                                    <input id="bb-login-username" class="input" type="text" placeholder="Text input" required>
+                                    <input id="bb-login-username" v-model="loginUserName" class="input" type="text" placeholder="Text input" required>
                                 </div>
                             </div>
                             <div class="field">
                                 <label for="bb-login-password" class="label">Password:</label>
                                 <div class="control">
-                                    <input id="bb-login-password" class="input" type="password" placeholder="Text input" required>
+                                    <input id="bb-login-password" v-model="loginPassword" class="input" type="password" placeholder="Text input" required>
                                 </div>
                             </div>
                             <div class="field is-grouped">
                                 <div class="control">
-                                    <button class="button is-link">Log in</button>
+                                    <button class="button is-link" v-on:click="logIn()">Log in</button>
                                 </div>
                                 <div class="control">
                                     <a class="button is-text" v-on:click="setActive('register')">Don't have an account?</a>
@@ -62,24 +62,36 @@
         <section v-if="!isLoggedIn() && isActive('register')" class="section">
             <div class="container">
                 <div class="columns">
-                    <div id="bb-login-form" class="bb-container column is-one-third is-offset-one-third">
+                    <div id="bb-register-form" class="bb-container column is-one-third is-offset-one-third">
                         <h3 class="subtitle">Register</h3>
                         <form action="#">
                             <div class="field">
-                                <label for="bb-login-username" class="label">Username:</label>
+                                <label for="bb-register-username" class="label">Username:</label>
                                 <div class="control">
-                                    <input id="bb-login-username" class="input" type="text" placeholder="Text input" required>
+                                    <input id="bb-register-username" v-model="registerUserName" class="input" type="text" placeholder="Text input" required>
                                 </div>
                             </div>
                             <div class="field">
-                                <label for="bb-login-password" class="label">Password:</label>
+                                <label for="bb-register-firstname" class="label">First name:</label>
                                 <div class="control">
-                                    <input id="bb-login-password" class="input" type="password" placeholder="Text input" required>
+                                    <input id="bb-register-firstname" v-model="registerFirstName" class="input" type="text" placeholder="Text input" required>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label for="bb-register-lastname" class="label">Last name:</label>
+                                <div class="control">
+                                    <input id="bb-register-lastname" v-model="registerLastName" class="input" type="text" placeholder="Text input" required>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label for="bb-register-password" class="label">Password:</label>
+                                <div class="control">
+                                    <input id="bb-register-password" v-model="registerPassword" class="input" type="password" placeholder="Text input" required>
                                 </div>
                             </div>
                             <div class="field is-grouped">
                                 <div class="control has-text-centered">
-                                    <button class="button is-link">Register</button>
+                                    <button class="button is-link" v-on:click="register()">Register</button>
                                 </div>
                                 <div class="control">
                                     <a class="button is-text" v-on:click="setActive('login')">Log in</a>
@@ -87,6 +99,47 @@
                             </div>
                         </form>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- navbar -->
+        <section v-if="isLoggedIn()" class="section">
+
+            <div class="container">
+                <div class="columns bb-menubar is-vcentered">
+                    <div class="column">
+                        <h3 class="subtitle">Hello {{currentUser.firstName}}!</h3>
+
+                    </div>
+                    <div class="column">
+                        <span class="is-pulled-right">
+                            <a class="button" v-on:click="logOut()">Logout</a>
+                            <a class="button">Remove Account</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- content -->
+        <section v-if="isLoggedIn()" class="section">
+            <div class="container">
+                <div class="columns">
+
+                    <div class="column is-3">
+                        <div class="column bb-bg">
+                            <p class="bb-bg">test</p>
+                        </div>
+                    </div>
+
+                    <div class="column">
+                        <div class="column bb-bg">
+                            <p>test</p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -107,7 +160,7 @@
         };
         firebase.initializeApp(config);
     </script>
-    
+
     <!-- Vue -->
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 

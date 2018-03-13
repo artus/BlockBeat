@@ -50,3 +50,21 @@ body
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
 }
+
+.bb-menubar
+{
+    background-color:   var(--bb-color-2-alternative);
+    color:              var(--bb-color-1);
+
+    border-radius: 5px;
+}
+
+.bb-menubar h3
+{
+    color: var(--bb-color-1);
+}
+
+.bb-bg
+{
+    background-color: var(--bb-color-2-alternative);
+}

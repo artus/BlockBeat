@@ -95,3 +95,6 @@ export class BlockBeat
         return new driver.Ed25519Keypair(bip39.mnemonicToSeed(seed).slice(0, 32));
     }
 }
+
+export * from './HeartRate';
+export * from './Person';
