@@ -78,6 +78,7 @@ var bbApp = new Vue({
             this.currentIdentity = undefined;
             this.assetId = undefined;
             this.asset = undefined;
+            this.heartRates = new Array();
             this.clearInputFields();
             this.setActive('login');
         },
@@ -123,6 +124,8 @@ var bbApp = new Vue({
             this.loginPassword = "";
 
             this.inputHeartrate = "";
+
+            this.logText = "";
         },
         loadAsset(asset) {
             this.log("Asset for patient with id " + this.currentUser.id + " loaded: " + asset.id);
