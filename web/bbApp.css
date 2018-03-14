@@ -81,3 +81,8 @@ body
 {
     color: var(--bb-color-1);
 }
+
+.no-wrap
+{
+    word-wrap: unrestricted;
+}

@@ -14,10 +14,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var driver = __importStar(require("bigchaindb-driver"));
 var bip39 = __importStar(require("bip39"));
 var BlockBeat = /** @class */ (function () {
-    function BlockBeat(app_id, app_key, api_path) {
+    function BlockBeat(log, app_id, app_key, api_path) {
+        if (log === void 0) { log = console.log; }
         if (app_id === void 0) { app_id = "5f8c5f3f"; }
         if (app_key === void 0) { app_key = "f60a520fc0c384ae9f4ccd4d02675160"; }
         if (api_path === void 0) { api_path = "https://test.bigchaindb.com/api/v1/"; }
+        this.log = log;
         this._app_id = "9cc97217";
         this._app_key = "c2f607017548896f02d2bf45a7696cab";
         this._api_path = "https://test.bigchaindb.com/api/v1/";
@@ -107,26 +109,26 @@ var BlockBeat = /** @class */ (function () {
      */
     BlockBeat.prototype.addHeartRate = function (transaction, heartRate, identity, callback) {
         var _this = this;
-        console.log("transaction started.");
+        this.log("transaction started.");
         // We retrieve the transaction based on its id
         this.connection.getTransaction(transaction.id).then(function (transaction) {
-            console.log("asset pulled");
+            _this.log("asset pulled");
             // We create a transfer transaction based on the returned transaction
             var transferTransaction = driver.Transaction.makeTransferTransaction([{ tx: transaction, output_index: 0 }], [driver.Transaction.makeOutput(driver.Transaction.makeEd25519Condition(identity.publicKey))], 
             // Add the new HeartRate reading as metadata.
             heartRate);
-            console.log("signing transaction");
+            _this.log("signing transaction");
             // Sign this transaction
             var signedTransaction = driver.Transaction.signTransaction(transferTransaction, identity.privateKey);
-            console.log("posting transaction.");
+            _this.log("posting transaction.");
             // Submit this transaction and return the promise
             return _this.connection.postTransaction(signedTransaction);
         }).then(function (signedTransaction) {
-            console.log("transaction sent.");
+            _this.log("transaction sent.");
             // Poll for the status of the submitted transaction
             return _this.connection.pollStatusAndFetchTransaction(signedTransaction.id);
         }).then(function (response) {
-            console.log("transaction sucesfully appended.");
+            _this.log("transaction sucesfully appended.");
             // Send the id to the callback function
             callback(response.id);
         });

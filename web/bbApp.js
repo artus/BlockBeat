@@ -2,7 +2,7 @@ var bbApp = new Vue({
     el: '#bbApp',
     data: {
         // The BlockBeat class connecting to BigChainDB
-        blockBeat: new blockbeat_module.BlockBeat(),
+        blockBeat: new blockbeat_module.BlockBeat(this.log),
 
         // List of all transactions
         heartRates: new Array(),
@@ -36,6 +36,8 @@ var bbApp = new Vue({
         loginPassword: "",
 
         inputHeartrate: "",
+
+        logText:  "",
     },
     methods: {
         isActive(pane) {
@@ -172,7 +174,10 @@ var bbApp = new Vue({
             }
         },
         log(message) {
-            console.log(new Date().toLocaleTimeString() + " - " + message);
+            
+            let timedMessage = new Date().toLocaleTimeString() + " - " + message;
+            this.logText = timedMessage + '\n' + this.logText;
+            console.log(timedMessage);
         }
     }
 });

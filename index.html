@@ -130,16 +130,14 @@
                 <div class="columns">
                     <div class="column bb-bg bb-rounded">
                         <h3 class="subtitle">Add heartrate reading</h3>
-                        <form action="#">
                             <div class="field has-addons">
                                 <div class="control is-expanded">
-                                    <input type="text" v-model="inputHeartrate" class="input" placeholder="e.g. 85">
+                                    <input type="text" v-model="inputHeartrate" v-on:keyup.enter="addHeartRateClicked()" class="input" placeholder="e.g. 85">
                                 </div>
                                 <div class="control">
                                     <a class="button is-success" v-on:click="addHeartRateClicked()">Add!</a>
                                 </div>
                             </div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -154,7 +152,10 @@
 
                     <div class="column is-3">
                         <div class="column bb-bg bb-rounded">
-                            <p class="bb-bg">test</p>
+                            <h3 class="subtitle">Logs</h3>
+                            <textarea v-model="logText" class="textarea no-wrap" rows="10" readonly>
+                                
+                            </textarea>
                         </div>
                     </div>
 
@@ -186,8 +187,8 @@
                             <h3 class="subtitle">Raw data</h3>
 
                             <div class="box">
-                                <text-area v-model="JSON.stringify(heartRates)" readonly>
-                                </text-area>
+                                <textarea v-model="JSON.stringify(heartRates)" class="textarea" rows="10" readonly>
+                                </textarea>
                             </div>
 
                         </div>

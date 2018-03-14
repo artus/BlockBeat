@@ -15,7 +15,7 @@ export class BlockBeat {
 
     public _persons = new Array<Person>();
 
-    constructor(app_id: string = "5f8c5f3f", app_key: string = "f60a520fc0c384ae9f4ccd4d02675160", api_path: string = "https://test.bigchaindb.com/api/v1/") {
+    constructor(public log : any = console.log, app_id: string = "5f8c5f3f", app_key: string = "f60a520fc0c384ae9f4ccd4d02675160", api_path: string = "https://test.bigchaindb.com/api/v1/") {
         this._app_id = app_id;
         this._app_key = app_key;
         this._api_path = api_path;
@@ -104,12 +104,12 @@ export class BlockBeat {
      */
     public addHeartRate(transaction: any, heartRate: HeartRate, identity: any, callback: any): any {
 
-        console.log("transaction started.");
+        this.log("transaction started.");
 
         // We retrieve the transaction based on its id
         this.connection.getTransaction(transaction.id).then(transaction => {
 
-            console.log("asset pulled");
+            this.log("asset pulled");
 
             // We create a transfer transaction based on the returned transaction
             const transferTransaction = driver.Transaction.makeTransferTransaction(
@@ -121,25 +121,25 @@ export class BlockBeat {
                 heartRate
             );
 
-            console.log("signing transaction");
+            this.log("signing transaction");
 
             // Sign this transaction
             const signedTransaction = driver.Transaction.signTransaction(transferTransaction, identity.privateKey);
 
-            console.log("posting transaction.");
+            this.log("posting transaction.");
 
             // Submit this transaction and return the promise
             return this.connection.postTransaction(signedTransaction);
         }).then(signedTransaction => {
 
-            console.log("transaction sent.");
+            this.log("transaction sent.");
 
             // Poll for the status of the submitted transaction
             return this.connection.pollStatusAndFetchTransaction(signedTransaction.id);
 
         }).then(response => {
 
-            console.log("transaction sucesfully appended.");
+            this.log("transaction sucesfully appended.");
 
             // Send the id to the callback function
             callback(response.id);
