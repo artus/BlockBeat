@@ -24,6 +24,7 @@ var bbApp = new Vue({
         currentUser: undefined,
         currentIdentity: undefined,
         assetId: undefined,
+        asset:  undefined,
 
         // inputfields
         registerUserName: "",
@@ -66,7 +67,7 @@ var bbApp = new Vue({
                 bbApp.currentIdentity = bbApp.blockBeat.generateIdentity(bbApp.loginPassword);
                 bbApp.getAllHeartRatesForCurrentUser();
                 bbApp.setActive('overview');
-                bbApp.blockBeat.getAssetIdByPatientId(bbApp.currentUser.id, bbApp.loadAssetId);
+                bbApp.blockBeat.getAssetByPatientId(bbApp.currentUser.id, bbApp.loadAsset);
                 bbApp.clearInputFields();
             });
         },
@@ -74,6 +75,7 @@ var bbApp = new Vue({
             this.currentUser = undefined;
             this.currentIdentity = undefined;
             this.assetId = undefined;
+            this.asset = undefined;
             this.clearInputFields();
             this.setActive('login');
         },
@@ -81,7 +83,7 @@ var bbApp = new Vue({
             var S4 = function () {
                 return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
             };
-            return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+            return (S4() + S4() + "-" + S4() + S4() +  "-" + S4() + S4() + "-" + S4() + S4() + "-" + S4() + S4() + S4());
         },
         register() {
             return firebase.database().ref('/users/').once('value').then(function (snapshot) {
@@ -120,16 +122,17 @@ var bbApp = new Vue({
 
             this.inputHeartrate = "";
         },
-        loadAssetId(id) {
-            this.assetId = id;
+        loadAsset(asset) {
+            this.log("Asset for patient with id " + this.currentUser.id + " loaded: " + asset.id);
+            this.asset = asset;
+            this.assetId = asset.id;
             this.getAllHeartRatesForCurrentUser();
         },
         addHeartRateClicked() {
             let bpm = this.inputHeartrate;
             this.addHeartRate(bpm);
             this.clearInputFields();
-        }
-        ,
+        },
         addHeartRate(bpm) {
 
             // Initialise a new HeartRate
@@ -145,23 +148,26 @@ var bbApp = new Vue({
             else {
 
                 // Asset ID found, we will append a HeartRate using an UPDATE transaction.
-                this.log("Sending TRANSFER transaction to BigChainDB to update patient asset with ID: " + this.assetId + ", bpm: " + bpm);
-                this.blockBeat.addHeartRate(this.assetId, heartRate, this.currentIdentity, this.transactionPosted);
+                this.log("Sending TRANSFER transaction to BigChainDB to update patient asset with latest transaction ID: " + this.latestTransaction().id + ", bpm: " + bpm);
+                this.blockBeat.addHeartRate(this.latestTransaction(), heartRate, this.currentIdentity, this.transactionPosted);
             }
 
             this.getAllHeartRatesForCurrentUser();
         },
+        latestTransaction() {
+            return this.heartRates[this.heartRates.length - 1];
+        },
         transactionPosted() {
-            this.blockBeat.getAssetIdByPatientId(this.currentUser.id, this.loadAssetId);
+            this.blockBeat.getAssetByPatientId(this.currentUser.id, this.loadAsset);
+            this.getAllHeartRatesForCurrentUser()
         },
         getAllHeartRatesForCurrentUser() {
             if (this.isLoggedIn() && this.enablePulling) {
                 this.log("Pulling patient data.");
 
                 // Load metadata for certain
-                this.blockBeat.getAllHeartRatesByPatientId(this.currentUser.id, (response) => {
-
-                    bbApp.heartRates = response;
+                this.blockBeat.getTransactionsByAssetId(this.assetId, (response) => {
+                    bbApp.heartRates = JSON.parse(response);
                 });
             }
         },

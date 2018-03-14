@@ -5487,27 +5487,27 @@ var BlockBeat = /** @class */ (function () {
             .then(function () { return _this.connection.pollStatusAndFetchTransaction(signedTransaction.id); })
             .then(function (res) {
             // txSigned.id corresponds to the asset id of the painting
-            callback(signedTransaction.id);
+            callback(res.id);
         });
     };
-    BlockBeat.prototype.getAssetIdByPatientId = function (patientId, callback) {
+    BlockBeat.prototype.getAssetByPatientId = function (patientId, callback) {
         this.connection.searchAssets(patientId).then(function (assets) {
-            callback(assets[0].id);
+            callback(assets[0]);
         });
     };
     /**
      * Append a new HeartRateReading to an existing asset.
      *
-     * @param [string] assetId - The ID of the asset we want to update/transfer.
-     * @param [HeartRate] heartRate - The new HeartRate reading we want to append.
-     * @param [any] identity - The identity of the asset owner.
-     * @param [any] callback - The callback function that needs to be executed on completion.
+     * @param {any} transaction - The transaction we want to update/transfer.
+     * @param {HeartRate} heartRate - The new HeartRate reading we want to append.
+     * @param {any} identity - The identity of the asset owner.
+     * @param {any} callback - The callback function that needs to be executed on completion.
      */
-    BlockBeat.prototype.addHeartRate = function (assetId, heartRate, identity, callback) {
+    BlockBeat.prototype.addHeartRate = function (transaction, heartRate, identity, callback) {
         var _this = this;
         console.log("transaction started.");
         // We retrieve the transaction based on its id
-        this.connection.getTransaction(assetId).then(function (transaction) {
+        this.connection.getTransaction(transaction.id).then(function (transaction) {
             console.log("asset pulled");
             // We create a transfer transaction based on the returned transaction
             var transferTransaction = driver.Transaction.makeTransferTransaction([{ tx: transaction, output_index: 0 }], [driver.Transaction.makeOutput(driver.Transaction.makeEd25519Condition(identity.publicKey))], 
@@ -5515,17 +5515,18 @@ var BlockBeat = /** @class */ (function () {
             heartRate);
             console.log("signing transaction");
             // Sign this transaction
-            var signedTransaction = driver.signTransaction(transferTransaction, identity.privateKey);
+            var signedTransaction = driver.Transaction.signTransaction(transferTransaction, identity.privateKey);
             console.log("posting transaction.");
             // Submit this transaction and return the promise
             return _this.connection.postTransaction(signedTransaction);
         }).then(function (signedTransaction) {
             console.log("transaction sent.");
             // Poll for the status of the submitted transaction
-            driver.pollStatusAndFetchTransaction(signedTransaction.id).then(function (response) {
-                // Send the id to the callback function
-                callback(response.id);
-            });
+            return _this.connection.pollStatusAndFetchTransaction(signedTransaction.id);
+        }).then(function (response) {
+            console.log("transaction sucesfully appended.");
+            // Send the id to the callback function
+            callback(response.id);
         });
     };
     /**
@@ -5547,6 +5548,23 @@ var BlockBeat = /** @class */ (function () {
         if (seed == "")
             return new driver.Ed25519Keypair();
         return new driver.Ed25519Keypair(bip39.mnemonicToSeed(seed).slice(0, 32));
+    };
+    /**
+     * Get an array of transactions for a certain asset with supplied ID.
+     *
+     * @param {string} assetId - The ID of the asset you want to pull the transactions from.
+     * @param {any} callback - The function that should handle the response.
+     */
+    BlockBeat.prototype.getTransactionsByAssetId = function (assetId, callback) {
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function () {
+            if (request.status == 200 && request.readyState == 4) {
+                callback(request.response);
+            }
+            ;
+        };
+        request.open("GET", "https://test.bigchaindb.com/api/v1/transactions?asset_id=" + assetId);
+        request.send();
     };
     return BlockBeat;
 }());

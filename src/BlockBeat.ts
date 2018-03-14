@@ -84,37 +84,36 @@ export class BlockBeat {
             .then(() => this.connection.pollStatusAndFetchTransaction(signedTransaction.id))
             .then(res => {
                 // txSigned.id corresponds to the asset id of the painting
-                callback(signedTransaction.id);
+                callback(res.id);
             })
     }
 
-    public getAssetIdByPatientId(patientId, callback)
-    {
+    public getAssetByPatientId(patientId, callback) {
         this.connection.searchAssets(patientId).then(assets => {
-            callback(assets[0].id);
+            callback(assets[0]);
         })
     }
 
     /**
      * Append a new HeartRateReading to an existing asset.
      * 
-     * @param [string] assetId - The ID of the asset we want to update/transfer.
-     * @param [HeartRate] heartRate - The new HeartRate reading we want to append.
-     * @param [any] identity - The identity of the asset owner.
-     * @param [any] callback - The callback function that needs to be executed on completion.
+     * @param {any} transaction - The transaction we want to update/transfer.
+     * @param {HeartRate} heartRate - The new HeartRate reading we want to append.
+     * @param {any} identity - The identity of the asset owner.
+     * @param {any} callback - The callback function that needs to be executed on completion.
      */
-    public addHeartRate(assetId: string, heartRate: HeartRate, identity: any, callback : any): any {
+    public addHeartRate(transaction: any, heartRate: HeartRate, identity: any, callback: any): any {
 
-            console.log("transaction started.");
+        console.log("transaction started.");
 
         // We retrieve the transaction based on its id
-        this.connection.getTransaction(assetId).then(transaction => {
+        this.connection.getTransaction(transaction.id).then(transaction => {
 
             console.log("asset pulled");
 
             // We create a transfer transaction based on the returned transaction
             const transferTransaction = driver.Transaction.makeTransferTransaction(
-                [{ tx: transaction, output_index: 0}],
+                [{ tx: transaction, output_index: 0 }],
 
                 [driver.Transaction.makeOutput(driver.Transaction.makeEd25519Condition(identity.publicKey))],
 
@@ -125,7 +124,7 @@ export class BlockBeat {
             console.log("signing transaction");
 
             // Sign this transaction
-            const signedTransaction = driver.signTransaction(transferTransaction, identity.privateKey);
+            const signedTransaction = driver.Transaction.signTransaction(transferTransaction, identity.privateKey);
 
             console.log("posting transaction.");
 
@@ -136,10 +135,14 @@ export class BlockBeat {
             console.log("transaction sent.");
 
             // Poll for the status of the submitted transaction
-            driver.pollStatusAndFetchTransaction(signedTransaction.id).then(response => {
-                // Send the id to the callback function
-                callback(response.id);
-            });
+            return this.connection.pollStatusAndFetchTransaction(signedTransaction.id);
+
+        }).then(response => {
+
+            console.log("transaction sucesfully appended.");
+
+            // Send the id to the callback function
+            callback(response.id);
         });
     }
 
@@ -147,14 +150,13 @@ export class BlockBeat {
      * 
      * @param callback 
      */
-    public getAllHeartRates(callback : any) 
-    {
+    public getAllHeartRates(callback: any) {
         this.connection.searchAssets("BlockBeatAsset").then(assets => {
             callback(assets);
         })
     }
 
-    public getAllHeartRatesByPatientId(patientId : string, callback: any) {
+    public getAllHeartRatesByPatientId(patientId: string, callback: any) {
         this.connection.searchMetadata(patientId).then(assets => {
             callback(assets);
         })
@@ -163,6 +165,25 @@ export class BlockBeat {
     public generateIdentity(seed: string = ""): any {
         if (seed == "") return new driver.Ed25519Keypair();
         return new driver.Ed25519Keypair(bip39.mnemonicToSeed(seed).slice(0, 32));
+    }
+
+    /**
+     * Get an array of transactions for a certain asset with supplied ID.
+     * 
+     * @param {string} assetId - The ID of the asset you want to pull the transactions from.
+     * @param {any} callback - The function that should handle the response.
+     */
+    public getTransactionsByAssetId(assetId: string, callback: any) {
+        const request = new XMLHttpRequest();
+
+        request.onreadystatechange = () => {
+            if (request.status == 200 && request.readyState == 4) {
+                callback(request.response);
+            };
+        };
+
+        request.open("GET", "https://test.bigchaindb.com/api/v1/transactions?asset_id=" + assetId);
+        request.send();
     }
 }
 
