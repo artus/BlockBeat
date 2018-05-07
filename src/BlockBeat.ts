@@ -79,9 +79,7 @@ export class BlockBeat {
         const signedTransaction = driver.Transaction.signTransaction(txNewTransaction, identity.privateKey)
 
         // Send the transaction off to BigchainDB
-        this.connection.postTransaction(signedTransaction)
-            // Check the status of the transaction
-            .then(() => this.connection.pollStatusAndFetchTransaction(signedTransaction.id))
+        this.connection.postTransactionCommit(signedTransaction)
             .then(res => {
                 // txSigned.id corresponds to the asset id of the painting
                 callback(res.id);
@@ -129,13 +127,7 @@ export class BlockBeat {
             this.log("posting transaction.");
 
             // Submit this transaction and return the promise
-            return this.connection.postTransaction(signedTransaction);
-        }).then(signedTransaction => {
-
-            this.log("transaction sent.");
-
-            // Poll for the status of the submitted transaction
-            return this.connection.pollStatusAndFetchTransaction(signedTransaction.id);
+	    return this.connection.postTransactionCommit(signedTransaction);
 
         }).then(response => {
 

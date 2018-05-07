@@ -69,7 +69,6 @@ var BlockBeat = /** @class */ (function () {
      * @param [HeartRate] heartRate - The HeartRate to add.
      */
     BlockBeat.prototype.createHeartRate = function (patientId, heartRate, identity, callback) {
-        var _this = this;
         var output = [driver.Transaction.makeOutput(driver.Transaction.makeEd25519Condition(identity.publicKey))
         ];
         var txNewTransaction = driver.Transaction.makeCreateTransaction(
@@ -87,8 +86,7 @@ var BlockBeat = /** @class */ (function () {
         // We sign this new transaction
         var signedTransaction = driver.Transaction.signTransaction(txNewTransaction, identity.privateKey);
         // Send the transaction off to BigchainDB
-        this.connection.postTransaction(signedTransaction)
-            .then(function () { return _this.connection.pollStatusAndFetchTransaction(signedTransaction.id); })
+        this.connection.postTransactionCommit(signedTransaction)
             .then(function (res) {
             // txSigned.id corresponds to the asset id of the painting
             callback(res.id);
@@ -122,11 +120,7 @@ var BlockBeat = /** @class */ (function () {
             var signedTransaction = driver.Transaction.signTransaction(transferTransaction, identity.privateKey);
             _this.log("posting transaction.");
             // Submit this transaction and return the promise
-            return _this.connection.postTransaction(signedTransaction);
-        }).then(function (signedTransaction) {
-            _this.log("transaction sent.");
-            // Poll for the status of the submitted transaction
-            return _this.connection.pollStatusAndFetchTransaction(signedTransaction.id);
+            return _this.connection.postTransactionCommit(signedTransaction);
         }).then(function (response) {
             _this.log("transaction sucesfully appended.");
             // Send the id to the callback function
